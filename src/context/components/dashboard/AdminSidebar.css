@@ -14,7 +14,7 @@
 
 /* Sidebar Header */
 .sidebar h3 {
-  background-color: #16a085;
+  background-color: teal;
   color: #ffffff;
   font-size: 20px;
   text-align: center;
@@ -43,7 +43,7 @@
 
 /* Hover Effect */
 .sidebar a:hover {
-  background-color: #0da082;
+  background-color: #1abc9c;
   border-left: 4px solid #1abc9c;
   color: #ffffff;
 }

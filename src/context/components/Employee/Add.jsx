@@ -1,204 +1,143 @@
-import React, { useState, useEffect } from "react";
-import { fetchDepartments } from "../../../utils/EmployeeHelper";
+import React, { useEffect, useState } from "react";
+import { fetchDepartments } from "../../../utils/EmployeeHelper.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from 'jwt-decode';  
-import "./add.css"; 
+import "./add.css"; // Import the CSS file
 
 const Add = () => {
   const [departments, setDepartments] = useState([]);
-  const [employeeData, setEmployeeData] = useState({
-    name: "",
-    email: "",
-    employeeID: "",
-    dob: "",
-    gender: "",
-    maritalStatus: "",
-    designation: "",
-    department: "",
-    salary: "",
-    password: "",
-    role: "",
-    image: null,
-  });
-  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
     const getDepartments = async () => {
-      try {
-        const fetchedDepartments = await fetchDepartments();
-        setDepartments(fetchedDepartments);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching departments:", error.response?.data || error.message);
-        alert("Failed to fetch departments.");
-        setLoading(false);
-      }
+      const departments = await fetchDepartments();
+      setDepartments(departments);
     };
     getDepartments();
   }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "image" && files) {
-      setEmployeeData((prevData) => ({ ...prevData, image: files[0] }));
+    if (name === "image") {
+      setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
     } else {
-      setEmployeeData((prevData) => ({ ...prevData, [name]: value }));
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation check before submission
-    if (
-      !employeeData.name ||
-      !employeeData.email ||
-      !employeeData.employeeID ||
-      !employeeData.department
-    ) {
-      alert("Please fill all required fields.");
-      return;
-    }
-
-    const formData = new FormData();
-    Object.entries(employeeData).forEach(([key, value]) => {
-      if (value) formData.append(key, value);
+    const formDataObj = new FormData();
+    Object.keys(formData).forEach((key) => {
+      formDataObj.append(key, formData[key]);
     });
 
     try {
-      // Retrieve token from localStorage and decode it
-      const token = localStorage.getItem("token");
-      const decodedToken = jwtDecode(token);
-      console.log("Decoded Token:", decodedToken);
-
-      // Adding token to request header for authorization
       const response = await axios.post(
         "http://localhost:5000/api/employee/add",
-        formData,
+        formDataObj,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-
       if (response.data.success) {
-        navigate("/admin-dashboard/employee");
-      } else {
-        alert(response.data.message || "Failed to add employee.");
+        navigate("/admin-dashboard/employees");
       }
     } catch (error) {
-      console.error("Error adding employee:", error.response?.data || error.message);
-      alert("An error occurred while adding the employee.");
+      if (error.response && !error.response.data.success) {
+        alert(error.response.data.error);
+      }
     }
   };
 
-  if (loading) {
-    return <div>Loading departments...</div>;
-  }
-
   return (
     <div className="container">
-      <h2 className="header">Add New Employee</h2>
-      <form onSubmit={handleSubmit} className="form">
-        <div className="row">
-          <div className="field">
-            <label className="label">Name</label>
+      <h2>Add New Employee</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-grid">
+          {/* Name */}
+          <div>
+            <label>Name</label>
             <input
               type="text"
               name="name"
-              placeholder="Insert Name"
-              value={employeeData.name}
               onChange={handleChange}
-              className="input"
+              placeholder="Insert Name"
+              required
             />
           </div>
-          <div className="field">
-            <label className="label">Email</label>
+
+          {/* Email */}
+          <div>
+            <label>Email</label>
             <input
               type="email"
               name="email"
-              placeholder="Insert Email"
-              value={employeeData.email}
               onChange={handleChange}
-              className="input"
+              placeholder="Insert Email"
+              required
             />
           </div>
-        </div>
-        <div className="row">
-          <div className="field">
-            <label className="label">Employee ID</label>
+
+          {/* Employee ID */}
+          <div>
+            <label>Employee ID</label>
             <input
               type="text"
-              name="employeeID"
+              name="employeeId"
+              onChange={handleChange}
               placeholder="Employee ID"
-              value={employeeData.employeeID}
-              onChange={handleChange}
-              className="input"
+              required
             />
           </div>
-          <div className="field">
-            <label className="label">Date of Birth</label>
-            <input
-              type="date"
-              name="dob"
-              value={employeeData.dob}
-              onChange={handleChange}
-              className="input"
-            />
+
+          {/* Date of Birth */}
+          <div>
+            <label>Date of Birth</label>
+            <input type="date" name="dob" onChange={handleChange} required />
           </div>
-        </div>
-        <div className="row">
-          <div className="field">
-            <label className="label">Gender</label>
-            <select
-              name="gender"
-              value={employeeData.gender}
-              onChange={handleChange}
-              className="input"
-            >
+
+          {/* Gender */}
+          <div>
+            <label>Gender</label>
+            <select name="gender" onChange={handleChange} required>
               <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
             </select>
           </div>
-          <div className="field">
-            <label className="label">Marital Status</label>
-            <select
-              name="maritalStatus"
-              value={employeeData.maritalStatus}
-              onChange={handleChange}
-              className="input"
-            >
+
+          {/* Marital Status */}
+          <div>
+            <label>Marital Status</label>
+            <select name="maritalStatus" onChange={handleChange} required>
               <option value="">Select Status</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
+              <option value="single">Single</option>
+              <option value="married">Married</option>
             </select>
           </div>
-        </div>
-        <div className="row">
-          <div className="field">
-            <label className="label">Designation</label>
+
+          {/* Designation */}
+          <div>
+            <label>Designation</label>
             <input
               type="text"
               name="designation"
-              placeholder="Designation"
-              value={employeeData.designation}
               onChange={handleChange}
-              className="input"
+              placeholder="Designation"
+              required
             />
           </div>
-          <div className="field">
-            <label className="label">Department</label>
-            <select
-              name="department"
-              value={employeeData.department}
-              onChange={handleChange}
-              className="input"
-            >
+
+          {/* Department */}
+          <div>
+            <label>Department</label>
+            <select name="department" onChange={handleChange} required>
               <option value="">Select Department</option>
               {departments.map((dep) => (
                 <option key={dep._id} value={dep._id}>
@@ -207,56 +146,54 @@ const Add = () => {
               ))}
             </select>
           </div>
-        </div>
-        <div className="row">
-          <div className="field">
-            <label className="label">Salary</label>
+
+          {/* Salary */}
+          <div>
+            <label>Salary</label>
             <input
               type="number"
               name="salary"
-              placeholder="Salary"
-              value={employeeData.salary}
               onChange={handleChange}
-              className="input"
+              placeholder="Salary"
+              required
             />
           </div>
-          <div className="field">
-            <label className="label">Password</label>
+
+          {/* Password */}
+          <div>
+            <label>Password</label>
             <input
               type="password"
               name="password"
-              placeholder="Password"
-              value={employeeData.password}
+              placeholder="******"
               onChange={handleChange}
-              className="input"
+              required
             />
           </div>
-        </div>
-        <div className="row">
-          <div className="field">
-            <label className="label">Role</label>
-            <select
-              name="role"
-              value={employeeData.role}
-              onChange={handleChange}
-              className="input"
-            >
+
+          {/* Role */}
+          <div>
+            <label>Role</label>
+            <select name="role" onChange={handleChange} required>
               <option value="">Select Role</option>
-              <option value="Admin">Admin</option>
-              <option value="Employee">Employee</option>
+              <option value="admin">Admin</option>
+              <option value="employee">Employee</option>
             </select>
           </div>
-          <div className="field">
-            <label className="label">Upload Image</label>
+
+          {/* Image Upload */}
+          <div>
+            <label>Upload Image</label>
             <input
               type="file"
               name="image"
               onChange={handleChange}
-              className="input"
+              accept="image/*"
             />
           </div>
         </div>
-        <button type="submit" className="button">
+
+        <button type="submit" className="mt-6">
           Add Employee
         </button>
       </form>

@@ -9,8 +9,12 @@ import AddDepartment from "./context/components/dashboard/department/AddDepartme
 import AdminSummary from "./context/components/dashboard/AdminSummary";
 import DepartmentList from "./context/components/dashboard/department/DepartmentList";
 import EditDepartment from "./context/components/dashboard/department/EditDepartment";
-import List from "./context/components/Employee/List.jsx"
-import Add from "./context/components/Employee/Add.jsx"
+import List from "./context/components/Employee/List.jsx";
+import Add from "./context/components/Employee/Add.jsx";
+import View from "./context/components/Employee/View.jsx";
+import Edit from "./context/components/Employee/Edit.jsx";
+import CustomerForm from "./context/components/EmployeeDashboard/CustomerForm";
+import Boq from "./context/components/EmployeeDashboard/Boq";
 
 const NotFound = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -25,14 +29,19 @@ function App() {
       <Route
         path="/"
         element={
+          // Check the role from context instead of localStorage
           localStorage.getItem("role") === "admin" ? (
             <Navigate to="/admin-dashboard" />
-          ) : (
+          ) : localStorage.getItem("role") === "employee" ? (
             <Navigate to="/employee-dashboard" />
+          ) : (
+            <Navigate to="/login" />
           )
         }
       />
       <Route path="/login" element={<Login />} />
+
+      {/* Admin Dashboard Routes */}
       <Route
         path="/admin-dashboard"
         element={
@@ -47,18 +56,27 @@ function App() {
         <Route path="department" element={<DepartmentList />} />
         <Route path="add-department" element={<AddDepartment />} />
         <Route path="department/:id" element={<EditDepartment />} />
-
-        <Route path="employees" element={<List/>} />
+        <Route path="employees" element={<List />} />
         <Route path="add-employee" element={<Add />} />
+        <Route path="employees/:id" element={<View />} />
+        <Route path="employees/edit/:id" element={<Edit />} />
       </Route>
+
+      {/* Employee Dashboard Routes */}
       <Route
         path="/employee-dashboard"
         element={
           <PrivateRoutes>
-            <EmployeeDashboard />
+            <RoleBaseRoutes requiredRole={["employee"]}>
+              <EmployeeDashboard />
+            </RoleBaseRoutes>
           </PrivateRoutes>
         }
-      />
+      >
+        <Route path="customer-contact-form/:id" element={<CustomerForm />} />
+        <Route path="BOQ-Form" element={<Boq />} />
+      </Route>
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

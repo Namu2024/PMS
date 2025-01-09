@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const AddDepartment = () => {
-  const [department, setDepartment] = useState({ dep_name: "", description: "" });
+  const [department, setDepartment] = useState({
+    dep_name: "",
+    description: "",
+  });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,11 +23,15 @@ const AddDepartment = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/department/add", department, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/department/add",
+        department,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         alert(response.data.message);

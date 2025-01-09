@@ -7,32 +7,35 @@ const Navbar = () => {
   return (
     <div
       style={{
-        width: "100%",
-        height: "60px",
-        backgroundColor: "#16a085",
+        width: "calc(100% - 250px)",
+        height: "50px",
+        backgroundColor: "teal",
         color: "white",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         padding: "0 20px",
-        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
         position: "fixed",
         top: 0,
-        left: "250px", // Matches sidebar width
+        left: "250px",
         zIndex: 1000,
+        boxSizing: "border-box",
       }}
     >
-      <h3 style={{ fontSize: "18px", fontWeight: "bold" }}>Welcome Admin</h3>
+      <h3 style={{ margin: "10px", fontSize: "20px", fontWeight: "bold" }}>
+        Welcome Admin
+      </h3>
       <button
         style={{
           backgroundColor: "#1abc9c",
           color: "white",
-          padding: "8px 20px",
+          padding: "10px 50px",
           border: "none",
           borderRadius: "20px",
-          cursor: "pointer",
           fontSize: "14px",
+          cursor: "pointer",
           transition: "background-color 0.3s ease",
+          margin: "750px",
         }}
         onMouseEnter={(e) => (e.target.style.backgroundColor = "#16a085")}
         onMouseLeave={(e) => (e.target.style.backgroundColor = "#1abc9c")}

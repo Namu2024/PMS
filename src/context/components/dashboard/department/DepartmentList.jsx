@@ -4,22 +4,25 @@ import DataTable from "react-data-table-component";
 import axios from "axios";
 
 const DepartmentList = () => {
-  const [departments, setDepartments] = useState([]); // Original list of departments
+  const [departments, setDepartments] = useState([]);
   const [depLoading, setDepLoading] = useState(false);
-  const [filterDepartments, setFilterDepartments] = useState([]); // Filtered departments
+  const [filterDepartments, setFilterDepartments] = useState([]);
 
   useEffect(() => {
     const fetchDepartments = async () => {
       setDepLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/department", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const response = await axios.get(
+          "http://localhost:5000/api/department",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         if (response.data.success) {
-          const data = response.data.departments?.map((dep, index) => ({
+          const data = response.data.departments.map((dep, index) => ({
             _id: dep._id,
             sno: index + 1,
             dep_name: dep.dep_name,
@@ -27,13 +30,15 @@ const DepartmentList = () => {
               <DepartmentButtons
                 id={dep._id}
                 onDeleteSuccess={() =>
-                  setDepartments((prev) => prev.filter((d) => d._id !== dep._id))
+                  setDepartments((prev) =>
+                    prev.filter((d) => d._id !== dep._id)
+                  )
                 }
               />
             ),
           }));
           setDepartments(data);
-          setFilterDepartments(data); // Set both departments and filtered departments
+          setFilterDepartments(data);
         } else {
           alert(response.data.error);
         }
@@ -53,7 +58,7 @@ const DepartmentList = () => {
     const filtered = departments.filter((dep) =>
       dep.dep_name.toLowerCase().includes(query)
     );
-    setFilterDepartments(filtered); // Set the filtered list in the state
+    setFilterDepartments(filtered);
   };
 
   const columns = [
@@ -65,11 +70,22 @@ const DepartmentList = () => {
   return (
     <div>
       <h3>Manage Department</h3>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "20px",
+        }}
+      >
         <input
           type="text"
           placeholder="Search by Department Name"
-          style={{ padding: "8px", width: "300px", borderRadius: "5px", border: "1px solid #ccc" }}
+          style={{
+            padding: "8px",
+            width: "300px",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+          }}
           onChange={filterDepartmentsList}
         />
         <Link
@@ -88,7 +104,7 @@ const DepartmentList = () => {
       {depLoading ? (
         <p>Loading...</p>
       ) : (
-        <DataTable columns={columns} data={filterDepartments} /> // Display filtered departments
+        <DataTable columns={columns} data={filterDepartments} />
       )}
     </div>
   );
@@ -102,11 +118,14 @@ const DepartmentButtons = ({ id, onDeleteSuccess }) => {
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this department?")) {
       try {
-        const response = await axios.delete(`http://localhost:5000/api/department/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const response = await axios.delete(
+          `http://localhost:5000/api/department/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         if (response.data.success) {
           alert("Department deleted successfully.");
