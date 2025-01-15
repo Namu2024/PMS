@@ -23,8 +23,9 @@ const AddDepartment = () => {
     }
 
     try {
+      console.log("Submitting Department:", department); // Debugging line
       const response = await axios.post(
-        "http://localhost:5000/api/department/add",
+        "http://localhost:5000/api/department",
         department,
         {
           headers: {
@@ -37,11 +38,14 @@ const AddDepartment = () => {
         alert(response.data.message);
         navigate("/admin-dashboard/department");
       } else {
-        alert("Failed to add department.");
+        alert(`Failed: ${response.data.error}`);
       }
     } catch (error) {
+      console.error(
+        "Error adding department:",
+        error.response?.data || error.message
+      );
       alert("Unable to add department. Check console for details.");
-      console.error(error);
     }
   };
 

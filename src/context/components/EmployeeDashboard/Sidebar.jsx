@@ -1,6 +1,12 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { FaBuilding, FaCalendarAlt, FaCogs, FaTachometerAlt, FaUsers } from "react-icons/fa";
+import {
+  FaBuilding,
+  FaCalendarAlt,
+  FaCogs,
+  FaTachometerAlt,
+  FaUsers,
+} from "react-icons/fa";
 
 const Sidebar = () => {
   return (
@@ -47,33 +53,48 @@ const Sidebar = () => {
       </style>
       <div className="sidebar">
         <div className="sidebar-header">Employee PMS System</div>
-        <NavLink to="" className={({ isActive }) =>
+        <NavLink
+          to="/employee-dashboard/summary"
+          className={({ isActive }) =>
             isActive ? "sidebar-link active" : "sidebar-link"
-          }>
+          }
+        >
           <FaTachometerAlt className="sidebar-icon" />
           Dashboard
         </NavLink>
-        <NavLink to="/CustomerForm" className={({ isActive }) =>
+        <NavLink
+          to="/employee-dashboard/customer-contact-form"
+          className={({ isActive }) =>
             isActive ? "sidebar-link active" : "sidebar-link"
-          }>
+          }
+        >
           <FaUsers className="sidebar-icon" />
-          Customer Contact Form
+          Customer Contact Forms
         </NavLink>
-        <NavLink to="/boq-form" className={({ isActive }) =>
+        <NavLink
+          to="/employee-dashboard/boq-form"
+          className={({ isActive }) =>
             isActive ? "sidebar-link active" : "sidebar-link"
-          }>
+          }
+        >
           <FaBuilding className="sidebar-icon" />
           BOQ Form
         </NavLink>
-        <NavLink to="/lead-lifecycle" className={({ isActive }) =>
+        <NavLink
+          to="/employee-dashboard/lead-lifecycle"
+          className={({ isActive }) =>
             isActive ? "sidebar-link active" : "sidebar-link"
-          }>
+          }
+        >
           <FaCalendarAlt className="sidebar-icon" />
           Lead Lifecycle
         </NavLink>
-        <NavLink to="/total-credit-points" className={({ isActive }) =>
+        <NavLink
+          to="/employee-dashboard/total-credit-points"
+          className={({ isActive }) =>
             isActive ? "sidebar-link active" : "sidebar-link"
-          }>
+          }
+        >
           <FaCogs className="sidebar-icon" />
           Total Credit Points
         </NavLink>

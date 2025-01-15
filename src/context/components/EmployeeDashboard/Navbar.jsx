@@ -1,14 +1,14 @@
 import React from "react";
-import { useAuth } from "../../authContext"; // Adjust path if needed
+import { useAuth } from "../../authContext";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const navbarStyle = {
     backgroundColor: "#319795",
     height: "60px",
     width: "100%",
-    position: "fixed", // Fixed position for the navbar
+    position: "fixed",
     top: 0,
     left: 0,
     zIndex: 1000,
@@ -22,12 +22,12 @@ const Navbar = () => {
 
   const welcomeStyle = {
     flex: 1, // To occupy available space
-    textAlign: "left", // Center-align the welcome message
-    fontSize: "22px", // Increased font size
+    textAlign: "left", 
+    fontSize: "22px", 
     fontWeight: "bold", // Bold font
-    merginLeft: "20px", // Added margin for spacing
-    whiteSpace: "nowrap", // Prevent text wrapping
-    textOverflow: "ellipsis", // Add ellipsis if text overflows
+    marginLeft: "20px", 
+    whiteSpace: "nowrap", 
+    textOverflow: "ellipsis", 
   };
 
   const logoutButtonStyle = {
@@ -47,7 +47,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    console.log("Logout clicked");
+    logout(); // Trigger the logout function from your auth context
   };
 
   return (
@@ -57,7 +57,8 @@ const Navbar = () => {
       <button
         style={logoutButtonStyle}
         onMouseOver={(e) =>
-          (e.target.style.backgroundColor = logoutButtonHoverStyle.backgroundColor)
+          (e.target.style.backgroundColor =
+            logoutButtonHoverStyle.backgroundColor)
         }
         onMouseOut={(e) =>
           (e.target.style.backgroundColor = logoutButtonStyle.backgroundColor)

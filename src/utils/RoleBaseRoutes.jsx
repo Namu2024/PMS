@@ -1,13 +1,12 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../context/authContext"; // Import useAuth
 
 const RoleBaseRoutes = ({ requiredRole, children }) => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Get the user from the auth context
 
-  // If user is not logged in or their role doesn't match, redirect to login
   if (!user || !requiredRole.includes(user.role)) {
-    return <Navigate to="/unauthorized" />;
+    return <Navigate to="/login" />;
   }
 
   return children;

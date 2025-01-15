@@ -28,7 +28,7 @@ const styles = `
     background-color: #2563eb; /* Blue */
   }
 
-  .credit-btn {
+  .salary-btn {
     background-color: #facc15; /* Yellow */
     color: black;
   }
@@ -129,7 +129,9 @@ export const EmployeeButtons = ({ Id }) => {
   const navigate = useNavigate();
 
   const handleDelete = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this employee?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this employee?"
+    );
     if (confirmDelete) {
       try {
         const response = await axios.delete(
@@ -169,15 +171,14 @@ export const EmployeeButtons = ({ Id }) => {
         Edit
       </button>
       <button
-        className="button credit-btn"
-        onClick={() => navigate(`/admin-dashboard/employees/credit-points/${Id}`)}
+        className="button salary-btn"
+        onClick={() =>
+          navigate(`/admin-dashboard/employees/credit-points/${Id}`)
+        }
       >
         Credit Points
       </button>
-      <button
-        className="button delete-btn"
-        onClick={handleDelete}
-      >
+      <button className="button delete-btn" onClick={handleDelete}>
         Delete
       </button>
     </div>

@@ -1,29 +1,26 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import Navbar from "../context/components/EmployeeDashboard/Navbar.jsx";
-import Sidebar from "../context/components/EmployeeDashboard/Sidebar.jsx";
-import Summary from "../context/components/EmployeeDashboard/Summary"; // Import your SummaryCard
+import Navbar from "../context/components/Navbar.jsx";
+import AdminSidebar from "../context/components/dashboard/AdminSidebar";
 
-const EmployeeDashboard = () => {
+const AdminDashboard = () => {
   const layoutStyle = {
-    marginLeft: "250px", // Sidebar width
-    marginTop: "60px", // Navbar height
+    marginLeft: "250px",
+    marginTop: "60px",
     padding: "1rem",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#f1f1f1",
     minHeight: "100vh",
   };
 
   return (
     <>
       <Navbar />
-      <Sidebar />
+      <AdminSidebar />
       <main style={layoutStyle}>
-        {/* Add your SummaryCard component here */}
-        <Summary />
         <Outlet />
       </main>
     </>
   );
 };
 
-export default EmployeeDashboard;
+export default AdminDashboard;

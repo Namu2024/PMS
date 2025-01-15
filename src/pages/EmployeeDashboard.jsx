@@ -1,13 +1,13 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import Navbar from '../context/components/EmployeeDashboard/Navbar.jsx';
-import Sidebar from '../context/components/EmployeeDashboard/Sidebar.jsx';
-import Summary from '../context/components/EmployeeDashboard/Summary.jsx';  // Import the Summary component
+import React from "react";
+import { Outlet } from "react-router-dom";
+import Navbar from "../context/components/EmployeeDashboard/Navbar";
+import Sidebar from "../context/components/EmployeeDashboard/Sidebar";
+// import Summary from "../context/components/EmployeeDashboard/Summary"; // Correct path
 
 const EmployeeDashboard = () => {
   const layoutStyle = {
-    marginLeft: "250px", // Sidebar width
-    marginTop: "60px", // Navbar height
+    marginLeft: "250px",
+    marginTop: "60px",
     padding: "1rem",
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
@@ -17,13 +17,10 @@ const EmployeeDashboard = () => {
     <>
       <Navbar />
       <Sidebar />
-      <div style={{ marginLeft: "250px", padding: "20px" }}>
-        {/* Add the Summary component here */}
-        <Summary />
-        <main style={layoutStyle}>
-          <Outlet />
-        </main>
-      </div>
+      {/* <Summary /> */}
+      <main style={layoutStyle}>
+        <Outlet />
+      </main>
     </>
   );
 };

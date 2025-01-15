@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/authContext";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
@@ -9,41 +10,48 @@ import AddDepartment from "./context/components/dashboard/department/AddDepartme
 import AdminSummary from "./context/components/dashboard/AdminSummary";
 import DepartmentList from "./context/components/dashboard/department/DepartmentList";
 import EditDepartment from "./context/components/dashboard/department/EditDepartment";
-import List from "./context/components/Employee/List.jsx";
-import Add from "./context/components/Employee/Add.jsx";
-import View from "./context/components/Employee/View.jsx";
-import Edit from "./context/components/Employee/Edit.jsx";
+import List from "./context/components/Employee/List";
+import Add from "./context/components/Employee/Add";
+import View from "./context/components/Employee/View";
+import Edit from "./context/components/Employee/Edit";
 import CustomerForm from "./context/components/EmployeeDashboard/CustomerForm";
 import Boq from "./context/components/EmployeeDashboard/Boq";
+import Summary from "./context/components/EmployeeDashboard/Summary"
 
 const NotFound = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
     <h1>404</h1>
     <p>Page Not Found</p>
-  </div>
+      </div>
 );
 
 function App() {
+  const { user } = useAuth();
+
   return (
     <Routes>
+      {/* Redirect Based on User Role */}
       <Route
         path="/"
         element={
-          // Check the role from context instead of localStorage
-          localStorage.getItem("role") === "admin" ? (
-            <Navigate to="/admin-dashboard" />
-          ) : localStorage.getItem("role") === "employee" ? (
-            <Navigate to="/employee-dashboard" />
+          user ? (
+            user.role === "admin" ? (
+              <Navigate to="/admin-dashboard" />
+            ) : (
+              <Navigate to="/employee-dashboard" />
+            )
           ) : (
             <Navigate to="/login" />
           )
         }
       />
+
+      {/* Login Page */}
       <Route path="/login" element={<Login />} />
 
       {/* Admin Dashboard Routes */}
       <Route
-        path="/admin-dashboard"
+        path="/admin-dashboard/*"
         element={
           <PrivateRoutes>
             <RoleBaseRoutes requiredRole={["admin"]}>
@@ -64,7 +72,7 @@ function App() {
 
       {/* Employee Dashboard Routes */}
       <Route
-        path="/employee-dashboard"
+        path="/employee-dashboard/*"
         element={
           <PrivateRoutes>
             <RoleBaseRoutes requiredRole={["employee"]}>
@@ -73,10 +81,13 @@ function App() {
           </PrivateRoutes>
         }
       >
-        <Route path="customer-contact-form/:id" element={<CustomerForm />} />
-        <Route path="BOQ-Form" element={<Boq />} />
-      </Route>
+        <Route path="summary" element={<Summary />} />
+        <Route path="customer-contact-form" element={<CustomerForm />} />
 
+  <Route path="boq-form" element={<Boq />} />
+</Route>
+
+      {/* 404 Page */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
