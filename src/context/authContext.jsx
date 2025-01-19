@@ -12,7 +12,6 @@ const AuthContext = ({ children }) => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          // Verify the token with the backend
           const response = await axios.get(
             "http://localhost:5000/api/auth/verify",
             {
@@ -21,40 +20,28 @@ const AuthContext = ({ children }) => {
               },
             }
           );
-
           if (response.data.success) {
             setUser(response.data.user);
-          } else {
-            console.warn("Verification failed:", response.data.message);
-            setUser(null);
           }
         } else {
-          console.warn("No token found in local storage.");
           setUser(null);
+          setLoading(false);
         }
       } catch (error) {
-        // Log errors for debugging
-        console.error("Error during verification:", error);
-        if (error.response) {
-          console.error("Error response:", error.response.data);
+        if (error.response && !error.response.data.error) {
+          setUser(null);
         }
-        setUser(null);
       } finally {
-        // Stop loading after verification attempt
         setLoading(false);
       }
     };
-
     verifyUser();
   }, []);
 
-  // Login function
-  const login = (user, token) => {
+  const login = (user) => {
     setUser(user);
-    localStorage.setItem("token", token);
   };
 
-  // Logout function
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
@@ -67,7 +54,5 @@ const AuthContext = ({ children }) => {
   );
 };
 
-// Custom hook to use the AuthContext
 export const useAuth = () => useContext(userContext);
-
 export default AuthContext;

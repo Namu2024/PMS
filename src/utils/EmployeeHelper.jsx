@@ -28,7 +28,7 @@ const styles = `
     background-color: #2563eb; /* Blue */
   }
 
-  .salary-btn {
+  .credit-btn {
     background-color: #facc15; /* Yellow */
     color: black;
   }
@@ -171,9 +171,9 @@ export const EmployeeButtons = ({ Id }) => {
         Edit
       </button>
       <button
-        className="button salary-btn"
+        className="button credit-btn"
         onClick={() =>
-          navigate(`/admin-dashboard/employees/credit-points/${Id}`)
+          navigate(`/admin-dashboard/employees/CreditPoints/${Id}`)
         }
       >
         Credit Points

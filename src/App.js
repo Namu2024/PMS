@@ -14,15 +14,16 @@ import List from "./context/components/Employee/List";
 import Add from "./context/components/Employee/Add";
 import View from "./context/components/Employee/View";
 import Edit from "./context/components/Employee/Edit";
+import CreditPoints from "./context/components/Employee/CreditPoints";
 import CustomerForm from "./context/components/EmployeeDashboard/CustomerForm";
 import Boq from "./context/components/EmployeeDashboard/Boq";
-import Summary from "./context/components/EmployeeDashboard/Summary"
+import Summary from "./context/components/EmployeeDashboard/Summary";
 
 const NotFound = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
     <h1>404</h1>
     <p>Page Not Found</p>
-      </div>
+  </div>
 );
 
 function App() {
@@ -30,7 +31,6 @@ function App() {
 
   return (
     <Routes>
-      {/* Redirect Based on User Role */}
       <Route
         path="/"
         element={
@@ -45,8 +45,6 @@ function App() {
           )
         }
       />
-
-      {/* Login Page */}
       <Route path="/login" element={<Login />} />
 
       {/* Admin Dashboard Routes */}
@@ -67,6 +65,7 @@ function App() {
         <Route path="employees" element={<List />} />
         <Route path="add-employee" element={<Add />} />
         <Route path="employees/:id" element={<View />} />
+        <Route path="employees/CreditPoints/:id" element={<CreditPoints />} />
         <Route path="employees/edit/:id" element={<Edit />} />
       </Route>
 
@@ -83,11 +82,9 @@ function App() {
       >
         <Route path="summary" element={<Summary />} />
         <Route path="customer-contact-form" element={<CustomerForm />} />
+        <Route path="boq-form" element={<Boq />} />
+      </Route>
 
-  <Route path="boq-form" element={<Boq />} />
-</Route>
-
-      {/* 404 Page */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -15,15 +15,24 @@ const BoqForm = () => {
   useEffect(() => {
     const fetchEntries = async () => {
       try {
-        const savedBoqEntries = localStorage.getItem("boqEntries");
-        if (savedBoqEntries) {
-          setBoqEntries(JSON.parse(savedBoqEntries));
-        } else {
-          const boqResponse = await axios.get("http://localhost:5000/boq");
-          setBoqEntries(boqResponse.data);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found");
+          return;
         }
+
+        const boqResponse = await axios.get("http://localhost:5000/api/boq", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setBoqEntries(boqResponse.data);
       } catch (error) {
-        console.error("Error fetching BOQ entries:", error);
+        console.error(
+          "Error fetching BOQ entries:",
+          error.response ? error.response.data : error
+        );
       }
     };
 
@@ -71,21 +80,34 @@ const BoqForm = () => {
     };
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No token found");
+        return;
+      }
+
       const response = await axios.post(
-        "http://localhost:5000/api/sales",
-        newEntry
+        "http://localhost:5000/api/boq",
+        newEntry,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+
       const updatedBoqEntries = [...boqEntries, response.data];
       setBoqEntries(updatedBoqEntries);
       calculateTotalCreditPoints(updatedBoqEntries);
 
-      // Save updated BOQ entries to localStorage
       localStorage.setItem("boqEntries", JSON.stringify(updatedBoqEntries));
 
-      // Reset form
       setBoqFormData({ customerName: "", meetingTime: "", boqTime: "" });
     } catch (error) {
-      console.error("Error submitting BOQ entry:", error);
+      console.error(
+        "Error submitting BOQ entry:",
+        error.response ? error.response.data : error
+      );
     }
   };
 
@@ -100,10 +122,12 @@ const BoqForm = () => {
   };
 
   return (
-    <div className="container">
-      <h2>BOQ Entry</h2>
-      <form onSubmit={handleBoqSubmit} className="boq-form">
-        <label htmlFor="customerName">Customer Name</label>
+    <div style={styles.container}>
+      <h2 style={styles.heading}>BOQ Entry</h2>
+      <form onSubmit={handleBoqSubmit} style={styles.boqForm}>
+        <label htmlFor="customerName" style={styles.label}>
+          Customer Name
+        </label>
         <input
           type="text"
           name="customerName"
@@ -111,52 +135,73 @@ const BoqForm = () => {
           value={boqFormData.customerName}
           onChange={handleBoqChange}
           required
+          style={styles.input}
         />
-        <label htmlFor="meetingTime">Meeting Time</label>
+        <label htmlFor="meetingTime" style={styles.label}>
+          Meeting Time
+        </label>
         <input
           type="datetime-local"
           name="meetingTime"
           value={boqFormData.meetingTime}
           onChange={handleBoqChange}
           required
+          style={styles.input}
         />
-        <label htmlFor="boqTime">BOQ Share Time</label>
+        <label htmlFor="boqTime" style={styles.label}>
+          BOQ Share Time
+        </label>
         <input
           type="datetime-local"
           name="boqTime"
           value={boqFormData.boqTime}
           onChange={handleBoqChange}
           required
+          style={styles.input}
         />
-        <button type="submit">Submit BOQ</button>
+        <button type="submit" style={styles.button}>
+          Submit BOQ
+        </button>
       </form>
 
-      <h2>BOQ Entries</h2>
-      <h3>
+      <h2 style={styles.heading}>BOQ Entries</h2>
+      <h3 style={styles.salesSummary}>
         Total BOQ Credit Points (This Month):{" "}
         {salesTotalThisMonth >= 0
           ? `+${salesTotalThisMonth}`
           : salesTotalThisMonth}
       </h3>
       {boqEntries.length > 0 ? (
-        <table className="boq-table">
+        <table style={styles.table}>
           <thead>
             <tr>
-              <th>Customer Name</th>
-              <th>Meeting Time</th>
-              <th>BOQ Share Time</th>
-              <th>Total Process Time (hours)</th>
-              <th>Credit Points</th>
+              <th style={styles.tableHeader}>Customer Name</th>
+              <th style={styles.tableHeader}>Meeting Time</th>
+              <th style={styles.tableHeader}>BOQ Share Time</th>
+              <th style={styles.tableHeader}>Total Process Time (hours)</th>
+              <th style={styles.tableHeader}>Credit Points</th>
             </tr>
           </thead>
           <tbody>
             {boqEntries.map((entry, index) => (
               <tr key={index}>
-                <td>{entry.customerName}</td>
-                <td>{new Date(entry.meetingTime).toLocaleString()}</td>
-                <td>{new Date(entry.boqTime).toLocaleString()}</td>
-                <td>{parseFloat(entry.totalProcessTime).toFixed(2)}</td>
-                <td>
+                <td style={styles.tableCell}>{entry.customerName}</td>
+                <td style={styles.tableCell}>
+                  {new Date(entry.meetingTime).toLocaleString()}
+                </td>
+                <td style={styles.tableCell}>
+                  {new Date(entry.boqTime).toLocaleString()}
+                </td>
+                <td style={styles.tableCell}>
+                  {parseFloat(entry.totalProcessTime).toFixed(2)}
+                </td>
+                <td
+                  style={{
+                    ...styles.tableCell,
+                    color: entry.creditPoints >= 0 ? "green" : "red",
+                    fontWeight: "bold",
+                  }}
+                >
                   {entry.creditPoints >= 0
                     ? `+${entry.creditPoints}`
                     : entry.creditPoints}
@@ -166,75 +211,84 @@ const BoqForm = () => {
           </tbody>
         </table>
       ) : (
-        <p>No BOQ entries yet.</p>
+        <p style={styles.noEntries}>No BOQ entries yet.</p>
       )}
-
-      <style jsx>{`
-        .container {
-          width: 80%;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .sales-form {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .sales-form label {
-          font-size: 1rem;
-          font-weight: bold;
-        }
-
-        .sales-form input {
-          padding: 10px;
-          font-size: 1rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-
-        .sales-form button {
-          padding: 10px;
-          font-size: 1rem;
-          background-color: #4caf50;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        .sales-form button:hover {
-          background-color: #45a049;
-        }
-
-        .sales-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-
-        .sales-table th,
-        .sales-table td {
-          padding: 10px;
-          text-align: left;
-          border: 1px solid #ddd;
-        }
-
-        .sales-table th {
-          background-color: #f4f4f4;
-        }
-
-        .sales-table tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-
-        .sales-table tr:hover {
-          background-color: #f1f1f1;
-        }
-      `}</style>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    width: "80%",
+    maxWidth: "1200px",
+    margin: "20px auto",
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#f9f9f9",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+  },
+  heading: {
+    fontSize: "2rem",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: "20px",
+  },
+  label: {
+    fontSize: "1rem",
+    color: "#444",
+    marginBottom: "5px",
+  },
+  input: {
+    padding: "10px",
+    marginBottom: "15px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+    fontSize: "1rem",
+    width: "100%",
+  },
+  button: {
+    padding: "12px",
+    backgroundColor: "#007bff",
+    color: "white",
+    fontSize: "1rem",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
+  buttonHover: {
+    backgroundColor: "#0056b3",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginTop: "20px",
+    border: "1px solid #ddd",
+  },
+  tableHeader: {
+    padding: "10px",
+    textAlign: "left",
+    border: "1px solid #ddd",
+    backgroundColor: "#f2f2f2",
+    color: "#555",
+  },
+  tableCell: {
+    padding: "10px",
+    textAlign: "left",
+    border: "1px solid #ddd",
+    color: "#333",
+  },
+  salesSummary: {
+    fontSize: "1.2rem",
+    color: "#666",
+    marginBottom: "20px",
+  },
+  noEntries: {
+    textAlign: "center",
+    color: "#888",
+    fontSize: "1rem",
+  },
 };
 
 export default BoqForm;

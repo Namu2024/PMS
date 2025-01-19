@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { columns, EmployeeButtons } from "../../../utils/EmployeeHelper.jsx"; // Adjusted path
+import { columns, EmployeeButtons } from "../../../utils/EmployeeHelper.jsx";
 import DataTable from "react-data-table-component";
 import axios from "axios";
 
@@ -13,11 +13,19 @@ const List = () => {
     const fetchEmployees = async () => {
       setEmpLoading(true);
       try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found in local storage. Please log in.");
+          return;
+        }
+
         const response = await axios.get("http://localhost:5000/api/employee", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         });
+
+        console.log("Employee API Response:", response);
 
         if (response.data.success) {
           let sno = 1;
@@ -41,11 +49,18 @@ const List = () => {
           }));
           setEmployees(data);
           setFilteredEmployees(data);
+        } else {
+          console.error(
+            "Unexpected API response. Ensure the backend API conforms to expectations.",
+            response.data
+          );
         }
       } catch (error) {
         console.error("Error fetching employees:", error.message);
         if (error.response?.data?.error) {
-          alert(error.response.data.error);
+          alert(`Error: ${error.response.data.error}`);
+        } else {
+          alert("An unexpected error occurred while fetching employees.");
         }
       } finally {
         setEmpLoading(false);
@@ -69,65 +84,64 @@ const List = () => {
 
   return (
     <div>
-      {/* CSS Styles */}
       <style>
         {`
-                      .employee-container {
-                          padding: 1.5rem;
-                      }
+          .employee-container {
+              padding: 1.5rem;
+          }
 
-                      .employee-title {
-                          text-align: center;
-                          font-size: 1.5rem;
-                          font-weight: bold;
-                      }
+          .employee-title {
+              text-align: center;
+              font-size: 1.5rem;
+              font-weight: bold;
+          }
 
-                      .employee-actions {
-                          display: flex;
-                          justify-content: space-between;
-                          align-items: center;
-                          margin-top: 1rem;
-                      }
+          .employee-actions {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 1rem;
+          }
 
-                      .employee-actions input {
-                          padding: 0.5rem 1rem;
-                          border: 1px solid #ddd;
-                          font-size: 1rem;
-                          width: 250px;
-                      }
+          .employee-actions input {
+              padding: 0.5rem 1rem;
+              border: 1px solid #ddd;
+              font-size: 1rem;
+              width: 250px;
+          }
 
-                      .employee-actions .add-employee-btn {
-                          padding: 0.5rem 1rem;
-                          background-color: #008080;
-                          color: white;
-                          border-radius: 0.375rem;
-                          font-weight: bold;
-                          text-decoration: none;
-                      }
+          .employee-actions .add-employee-btn {
+              padding: 0.5rem 1rem;
+              background-color: #008080;
+              color: white;
+              border-radius: 0.375rem;
+              font-weight: bold;
+              text-decoration: none;
+          }
 
-                      .employee-actions .add-employee-btn:hover {
-                          background-color: #006f6f;
-                      }
+          .employee-actions .add-employee-btn:hover {
+              background-color: #006f6f;
+          }
 
-                      .employee-table {
-                          margin-top: 1.5rem;
-                      }
+          .employee-table {
+              margin-top: 1.5rem;
+          }
 
-                      .employee-table img {
-                          width: 40px;
-                          border-radius: 50%;
-                      }
+          .employee-table img {
+              width: 40px;
+              border-radius: 50%;
+          }
 
-                      .employee-table th, .employee-table td {
-                          padding: 0.75rem;
-                          text-align: left;
-                      }
-                  `}
+          .employee-table th, .employee-table td {
+              padding: 0.75rem;
+              text-align: left;
+          }
+        `}
       </style>
 
       <div className="employee-container">
         <div className="employee-title">
-          <h3>Manage Employee</h3>
+          <h3>Manage Employees</h3>
         </div>
         <div className="employee-actions">
           <input

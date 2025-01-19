@@ -1,57 +1,106 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
 
 const CreditPoints = () => {
-  const { id } = useParams(); // Get employee ID from the route
-  const [employees, setEmployees] = useState([]);
+  const [salesEntries, setSalesEntries] = useState([]);
+  const [boqEntries, setBoqEntries] = useState([]);
+  const [salesCreditPoints, setSalesCreditPoints] = useState(0);
+  const [boqCreditPoints, setBoqCreditPoints] = useState(0);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  // Fetch employees
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/employees");
-        setEmployees(response.data);
+        const token = localStorage.getItem("token");
+
+        // Fetch sales form entries
+        const salesResponse = await axios.get(
+          "http://localhost:5000/api/sales",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // Fetch BOQ form entries
+        const boqResponse = await axios.get("http://localhost:5000/api/boq", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setSalesEntries(salesResponse.data);
+        setBoqEntries(boqResponse.data);
+
+        // Calculate month-wise credit points for the current month
+        calculateMonthlyCreditPoints(salesResponse.data, setSalesCreditPoints);
+        calculateMonthlyCreditPoints(boqResponse.data, setBoqCreditPoints);
       } catch (err) {
-        setError("Error fetching employees. Please try again later.");
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEmployees();
+    fetchData();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  // Function to calculate total credit points for the current month
+  const calculateMonthlyCreditPoints = (entries, setTotalCreditPoints) => {
+    const currentMonth = new Date().getMonth();
+    const totalPoints = entries
+      .filter(
+        (entry) => new Date(entry.leadTime).getMonth() === currentMonth // Month filter
+      )
+      .reduce((sum, entry) => sum + (entry.creditPoints || 0), 0);
+    setTotalCreditPoints(totalPoints);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
 
   return (
-    <div className="admin-dashboard">
-      <h1>Credit Points</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Sales Credit Points</th>
-            <th>BOQ Credit Points</th>
-            <th>Total Credit Points</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map((employee) => (
-            <tr key={employee._id}>
-              <td>{employee.name}</td>
-              <td>{employee.department}</td>
-              <td>{employee.salesCreditPoints}</td>
-              <td>{employee.boqCreditPoints}</td>
-              <td>{employee.totalCreditPoints}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="container">
+      <style>{`
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          font-family: Arial, sans-serif;
+        }
+        .credit-summary {
+          margin-bottom: 20px;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          background-color: #f9f9f9;
+        }
+        .error {
+          color: red;
+          font-weight: bold;
+          margin: 20px 0;
+        }
+      `}</style>
+      <h2>Employee Credit Points</h2>
+
+      <div className="credit-summary">
+        <h3>Total Sales Form Credit Points (This Month):</h3>
+        <p>
+          {salesCreditPoints >= 0
+            ? `+${salesCreditPoints.toFixed(2)}`
+            : salesCreditPoints.toFixed(2)}
+        </p>
+      </div>
+
+      <div className="credit-summary">
+        <h3>Total BOQ Form Credit Points (This Month):</h3>
+        <p>
+          {boqCreditPoints >= 0
+            ? `+${boqCreditPoints.toFixed(2)}`
+            : boqCreditPoints.toFixed(2)}
+        </p>
+      </div>
     </div>
   );
 };

@@ -13,8 +13,12 @@ const SalesForm = () => {
   useEffect(() => {
     const fetchEntries = async () => {
       try {
+        const token = localStorage.getItem("token");
         const salesResponse = await axios.get(
-          "http://localhost:5000/api/sales"
+          "http://localhost:5000/api/sales",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         setSalesEntries(salesResponse.data);
         calculateTotalCreditPoints(salesResponse.data);
@@ -31,12 +35,33 @@ const SalesForm = () => {
     setSalesFormData({ ...salesFormData, [name]: value });
   };
 
-  const calculateProcessTime = (leadTime, contactTime) => {
-    const lead = new Date(leadTime);
-    const contact = new Date(contactTime);
-    const diffInMs = contact - lead;
-    const diffInHours = diffInMs / (1000 * 60 * 60);
-    return diffInHours.toFixed(2); // Format to 2 decimal places
+  const handleSalesSubmit = async (e) => {
+    e.preventDefault();
+
+    const leadTime = new Date(salesFormData.leadTime);
+    const contactTime = new Date(salesFormData.contactTime);
+    const totalProcessTime = (contactTime - leadTime) / (1000 * 60 * 60);
+    const creditPoints = calculateCreditPoints(totalProcessTime);
+
+    const newEntry = {
+      ...salesFormData,
+      totalProcessTime: totalProcessTime,
+      creditPoints: creditPoints,
+    };
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "http://localhost:5000/api/sales",
+        newEntry,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSalesEntries([...salesEntries, response.data]);
+      calculateTotalCreditPoints([...salesEntries, response.data]);
+      setSalesFormData({ customerName: "", leadTime: "", contactTime: "" });
+    } catch (error) {
+      console.error("Error submitting sales entry:", error);
+    }
   };
 
   const calculateCreditPoints = (totalProcessTime) => {
@@ -49,33 +74,6 @@ const SalesForm = () => {
     return creditPoints;
   };
 
-  const handleSalesSubmit = async (e) => {
-    e.preventDefault();
-
-    const leadTime = new Date(salesFormData.leadTime);
-    const contactTime = new Date(salesFormData.contactTime);
-    const totalProcessTime = (contactTime - leadTime) / (1000 * 60 * 60); // in hours
-    const creditPoints = calculateCreditPoints(totalProcessTime);
-
-    const newEntry = {
-      ...salesFormData,
-      totalProcessTime: totalProcessTime,
-      creditPoints: creditPoints,
-    };
-
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/sales",
-        newEntry
-      );
-      setSalesEntries([...salesEntries, response.data]);
-      calculateTotalCreditPoints([...salesEntries, response.data]);
-      setSalesFormData({ customerName: "", leadTime: "", contactTime: "" });
-    } catch (error) {
-      console.error("Error submitting sales entry:", error);
-    }
-  };
-
   const calculateTotalCreditPoints = (entries) => {
     const currentMonth = new Date().getMonth();
     const totalPoints = entries
@@ -86,6 +84,60 @@ const SalesForm = () => {
 
   return (
     <div className="container">
+      <style>{`
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          font-family: Arial, sans-serif;
+        }
+        .sales-form {
+          margin-bottom: 20px;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+        .sales-form label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: bold;
+        }
+        .sales-form input {
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        }
+        .sales-form button {
+          padding: 10px 15px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .sales-form button:hover {
+          background-color: #0056b3;
+        }
+        .sales-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        .sales-table th,
+        .sales-table td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+        }
+        .sales-table th {
+          background-color: #f4f4f4;
+          font-weight: bold;
+        }
+        .sales-table tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+      `}</style>
       <h2>Sales Entry</h2>
       <form onSubmit={handleSalesSubmit} className="sales-form">
         <label htmlFor="customerName">Customer Name</label>
@@ -120,8 +172,8 @@ const SalesForm = () => {
       <h3>
         Total Sales Credit Points (This Month):{" "}
         {salesTotalThisMonth >= 0
-          ? `+${salesTotalThisMonth}`
-          : salesTotalThisMonth}
+          ? `+${salesTotalThisMonth.toFixed(2)}`
+          : salesTotalThisMonth.toFixed(2)}
       </h3>
       {salesEntries.length > 0 ? (
         <table className="sales-table">
@@ -140,11 +192,11 @@ const SalesForm = () => {
                 <td>{entry.customerName}</td>
                 <td>{new Date(entry.leadTime).toLocaleString()}</td>
                 <td>{new Date(entry.contactTime).toLocaleString()}</td>
-                <td>{entry.totalProcessTime}</td>
+                <td>{entry.totalProcessTime.toFixed(2)}</td>
                 <td>
                   {entry.creditPoints >= 0
-                    ? `+${entry.creditPoints}`
-                    : entry.creditPoints}
+                    ? `+${entry.creditPoints.toFixed(2)}`
+                    : entry.creditPoints.toFixed(2)}
                 </td>
               </tr>
             ))}
@@ -153,71 +205,6 @@ const SalesForm = () => {
       ) : (
         <p>No sales entries yet.</p>
       )}
-
-      <style jsx>{`
-        .container {
-          width: 80%;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .sales-form {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .sales-form label {
-          font-size: 1rem;
-          font-weight: bold;
-        }
-
-        .sales-form input {
-          padding: 10px;
-          font-size: 1rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-
-        .sales-form button {
-          padding: 10px;
-          font-size: 1rem;
-          background-color: #4caf50;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        .sales-form button:hover {
-          background-color: #45a049;
-        }
-
-        .sales-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-
-        .sales-table th,
-        .sales-table td {
-          padding: 10px;
-          text-align: left;
-          border: 1px solid #ddd;
-        }
-
-        .sales-table th {
-          background-color: #f4f4f4;
-        }
-
-        .sales-table tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-
-        .sales-table tr:hover {
-          background-color: #f1f1f1;
-        }
-      `}</style>
     </div>
   );
 };
