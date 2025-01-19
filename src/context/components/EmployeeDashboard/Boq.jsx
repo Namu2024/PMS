@@ -11,7 +11,7 @@ const BoqForm = () => {
   const [boqEntries, setBoqEntries] = useState([]);
   const [salesTotalThisMonth, setSalesTotalThisMonth] = useState(0);
 
-  // Load BOQ entries from localStorage or API
+  // Load BOQ entries from API
   useEffect(() => {
     const fetchEntries = async () => {
       try {
@@ -27,7 +27,7 @@ const BoqForm = () => {
           },
         });
 
-        setBoqEntries(boqResponse.data);
+        setBoqEntries(boqResponse.data || []);
       } catch (error) {
         console.error(
           "Error fetching BOQ entries:",
@@ -38,6 +38,11 @@ const BoqForm = () => {
 
     fetchEntries();
   }, []);
+
+  // Update total credit points when BOQ entries change
+  useEffect(() => {
+    calculateTotalCreditPoints(boqEntries);
+  }, [boqEntries]);
 
   const handleBoqChange = (e) => {
     const { name, value } = e.target;
@@ -58,6 +63,18 @@ const BoqForm = () => {
     if (totalProcessTime <= 4) return -50;
     if (totalProcessTime <= 5) return -100;
     return -200;
+  };
+
+  const calculateTotalCreditPoints = (entries) => {
+    const currentMonth = new Date().getMonth();
+    const totalPoints = entries
+      .filter((entry) => {
+        const entryDate = new Date(entry.meetingTime);
+        return entryDate.getMonth() === currentMonth && !isNaN(entryDate);
+      })
+      .reduce((sum, entry) => sum + (entry.creditPoints || 0), 0);
+
+    setSalesTotalThisMonth(totalPoints);
   };
 
   const handleBoqSubmit = async (e) => {
@@ -98,9 +115,6 @@ const BoqForm = () => {
 
       const updatedBoqEntries = [...boqEntries, response.data];
       setBoqEntries(updatedBoqEntries);
-      calculateTotalCreditPoints(updatedBoqEntries);
-
-      localStorage.setItem("boqEntries", JSON.stringify(updatedBoqEntries));
 
       setBoqFormData({ customerName: "", meetingTime: "", boqTime: "" });
     } catch (error) {
@@ -109,16 +123,6 @@ const BoqForm = () => {
         error.response ? error.response.data : error
       );
     }
-  };
-
-  const calculateTotalCreditPoints = (entries) => {
-    const currentMonth = new Date().getMonth();
-    const totalPoints = entries
-      .filter(
-        (entry) => new Date(entry.meetingTime).getMonth() === currentMonth
-      )
-      .reduce((sum, entry) => sum + (entry.creditPoints || 0), 0);
-    setSalesTotalThisMonth(totalPoints);
   };
 
   return (
@@ -256,9 +260,6 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
     transition: "background-color 0.3s",
-  },
-  buttonHover: {
-    backgroundColor: "#0056b3",
   },
   table: {
     width: "100%",
